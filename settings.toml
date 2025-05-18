@@ -1,0 +1,13 @@
+[default]
+APP_NAME = "MetricsCollector"
+DEBUG = false
+DB_HOST = "localhost"
+DB_PORT = "4444"
+DB_NAME = "monitoring_devices"
+DB_USER = "app_monitoring"
+DB_PASSWORD = "monitoring123"
+FEATURE_FLAG_NEW_LOGIC = false
+SSH_PRIVATE_KEY_PATH = "./app/ssh/ssh.key"
+SSH_USERNAME = "algroml"
+METRICS_SCRIPT_PATH = "collector/metrics_script.py"
+CORS_ALLOW_ORIGINS = ["http://webui.localhost:3000"]

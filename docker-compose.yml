@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  monitoring-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_NAME=monitoring
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DYNACONF_CORS_ALLOW_ORIGINS='["http://webui.localhost:3000"]'
+    volumes:
+      - ./app:/app
+      - ./ssh:/ssh
+      - ./alembic.ini:/alembic.ini
+      - ./settings.toml:/settings.toml
+      - ./app/migrations:/app/migrations
+      - ./app/ssh:/app/ssh
+      - ./app/collector/metrics_script.py:/app/collector/metrics_script.py
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: monitoring
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
