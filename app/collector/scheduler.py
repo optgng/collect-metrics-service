@@ -30,6 +30,32 @@ network_packets_sent_gauge = Gauge('network_packets_sent', 'Network Packets Sent
 network_packets_recv_gauge = Gauge('network_packets_recv', 'Network Packets Received', ['host_name'])
 device_up_gauge = Gauge('device_up', 'Device availability (1=up, 0=down)', ['host_name'])
 
+# Новые метрики CPU
+cpu_load1_gauge = Gauge('cpu_load1', 'CPU load average for 1 min', ['host_name'])
+cpu_user_seconds_gauge = Gauge('cpu_seconds_total_user', 'CPU user seconds total', ['host_name'])
+cpu_system_seconds_gauge = Gauge('cpu_seconds_total_system', 'CPU system seconds total', ['host_name'])
+cpu_iowait_seconds_gauge = Gauge('cpu_seconds_total_iowait', 'CPU iowait seconds total', ['host_name'])
+
+# Новые метрики Memory
+swap_total_gauge = Gauge('memory_SwapTotal_bytes', 'Swap total bytes', ['host_name'])
+swap_free_gauge = Gauge('memory_SwapFree_bytes', 'Swap free bytes', ['host_name'])
+memory_cached_gauge = Gauge('memory_Cached_bytes', 'Memory cached bytes', ['host_name'])
+memory_buffers_gauge = Gauge('memory_Buffers_bytes', 'Memory buffers bytes', ['host_name'])
+
+# Новые метрики Disk
+disk_io_time_gauge = Gauge('disk_io_time_seconds_total', 'Disk IO time seconds total', ['host_name'])
+disk_read_time_gauge = Gauge('disk_read_time_seconds_total', 'Disk read time seconds total', ['host_name'])
+disk_write_time_gauge = Gauge('disk_write_time_seconds_total', 'Disk write time seconds total', ['host_name'])
+disk_inodes_free_gauge = Gauge('filesystem_inodes_free', 'Filesystem inodes free', ['host_name'])
+
+# Новые метрики Network
+network_err_total_gauge = Gauge('network_err_total', 'Network errors total', ['host_name'])
+network_dropped_total_gauge = Gauge('network_dropped_total', 'Network dropped packets total', ['host_name'])
+tcp_curr_estab_gauge = Gauge('netstat_Tcp_CurrEstab', 'Active TCP connections', ['host_name'])
+
+# Новая метрика Uptime
+uptime_seconds_gauge = Gauge('uptime_seconds', 'Node uptime seconds', ['host_name'])
+
 def collect_metrics_from_hosts():
     """
     Сбор метрик с устройств из базы данных.
@@ -52,29 +78,56 @@ def collect_metrics_from_hosts():
                 # Метрика доступности устройства
                 device_up_gauge.labels(host_name=host_name).set(1)
 
-                # Обновление метрик для Prometheus
-                cpu_usage_gauge.labels(host_name=host_name).set(metrics['cpu']['usage_percent'])
-                memory_usage_gauge.labels(host_name=host_name).set(metrics['memory']['percent'])
-                disk_usage_gauge.labels(host_name=host_name).set(metrics['disk']['percent'])
+                # --- Новые метрики CPU ---
+                cpu = metrics['cpu']
+                cpu_load1_gauge.labels(host_name=host_name).set(cpu.get('cpu_load1', 0))
+                cpu_user_seconds_gauge.labels(host_name=host_name).set(cpu.get('cpu_seconds_total_user', 0))
+                cpu_system_seconds_gauge.labels(host_name=host_name).set(cpu.get('cpu_seconds_total_system', 0))
+                cpu_iowait_seconds_gauge.labels(host_name=host_name).set(cpu.get('cpu_seconds_total_iowait', 0))
 
-                # Обновление метрик для I/O и сети
-                io_read_bytes_gauge.labels(host_name=host_name).set(metrics['io']['read_bytes'])
-                io_write_bytes_gauge.labels(host_name=host_name).set(metrics['io']['write_bytes'])
-                network_bytes_sent_gauge.labels(host_name=host_name).set(metrics['network']['bytes_sent'])
-                network_bytes_recv_gauge.labels(host_name=host_name).set(metrics['network']['bytes_recv'])
+                # --- Новые метрики Memory ---
+                memory = metrics['memory']
+                swap_total_gauge.labels(host_name=host_name).set(memory.get('memory_SwapTotal_bytes', 0))
+                swap_free_gauge.labels(host_name=host_name).set(memory.get('memory_SwapFree_bytes', 0))
+                memory_cached_gauge.labels(host_name=host_name).set(memory.get('memory_Cached_bytes', 0))
+                memory_buffers_gauge.labels(host_name=host_name).set(memory.get('memory_Buffers_bytes', 0))
 
-                # Обновление дополнительных метрик для Prometheus
-                cpu_count_gauge.labels(host_name=host_name).set(metrics['cpu']['count'])
-                memory_total_gauge.labels(host_name=host_name).set(metrics['memory']['total'])
-                memory_used_gauge.labels(host_name=host_name).set(metrics['memory']['used'])
-                memory_free_gauge.labels(host_name=host_name).set(metrics['memory']['free'])
-                disk_total_gauge.labels(host_name=host_name).set(metrics['disk']['total'])
-                disk_used_gauge.labels(host_name=host_name).set(metrics['disk']['used'])
-                disk_free_gauge.labels(host_name=host_name).set(metrics['disk']['free'])
-                io_read_count_gauge.labels(host_name=host_name).set(metrics['io']['read_count'])
-                io_write_count_gauge.labels(host_name=host_name).set(metrics['io']['write_count'])
-                network_packets_sent_gauge.labels(host_name=host_name).set(metrics['network']['packets_sent'])
-                network_packets_recv_gauge.labels(host_name=host_name).set(metrics['network']['packets_recv'])
+                # --- Новые метрики Disk ---
+                disk = metrics['disk']
+                disk_io_time_gauge.labels(host_name=host_name).set(disk.get('disk_io_time_seconds_total', 0))
+                disk_read_time_gauge.labels(host_name=host_name).set(disk.get('disk_read_time_seconds_total', 0))
+                disk_write_time_gauge.labels(host_name=host_name).set(disk.get('disk_write_time_seconds_total', 0))
+                disk_inodes_free_gauge.labels(host_name=host_name).set(disk.get('filesystem_inodes_free', 0))
+
+                # --- Новые метрики Network ---
+                network = metrics['network']
+                network_err_total_gauge.labels(host_name=host_name).set(network.get('network_err_total', 0))
+                network_dropped_total_gauge.labels(host_name=host_name).set(network.get('network_dropped_total', 0))
+                tcp_curr_estab_gauge.labels(host_name=host_name).set(network.get('netstat_Tcp_CurrEstab', 0))
+
+                # --- Новая метрика Uptime ---
+                uptime = metrics['uptime']
+                uptime_seconds_gauge.labels(host_name=host_name).set(uptime.get('uptime_seconds', 0))
+
+                # --- Старые метрики ---
+                cpu_usage_gauge.labels(host_name=host_name).set(cpu.get('usage_percent', 0))
+                memory_usage_gauge.labels(host_name=host_name).set(memory.get('percent', 0))
+                disk_usage_gauge.labels(host_name=host_name).set(disk.get('percent', 0))
+                io_read_bytes_gauge.labels(host_name=host_name).set(disk.get('read_bytes', 0))
+                io_write_bytes_gauge.labels(host_name=host_name).set(disk.get('write_bytes', 0))
+                network_bytes_sent_gauge.labels(host_name=host_name).set(network.get('bytes_sent', 0))
+                network_bytes_recv_gauge.labels(host_name=host_name).set(network.get('bytes_recv', 0))
+                cpu_count_gauge.labels(host_name=host_name).set(cpu.get('count', 0))
+                memory_total_gauge.labels(host_name=host_name).set(memory.get('total', 0))
+                memory_used_gauge.labels(host_name=host_name).set(memory.get('used', 0))
+                memory_free_gauge.labels(host_name=host_name).set(memory.get('free', 0))
+                disk_total_gauge.labels(host_name=host_name).set(disk.get('total', 0))
+                disk_used_gauge.labels(host_name=host_name).set(disk.get('used', 0))
+                disk_free_gauge.labels(host_name=host_name).set(disk.get('free', 0))
+                io_read_count_gauge.labels(host_name=host_name).set(disk.get('read_count', 0))
+                io_write_count_gauge.labels(host_name=host_name).set(disk.get('write_count', 0))
+                network_packets_sent_gauge.labels(host_name=host_name).set(network.get('packets_sent', 0))
+                network_packets_recv_gauge.labels(host_name=host_name).set(network.get('packets_recv', 0))
 
                 print(f"Метрики с {host_name} ({device.ip_address}): {metrics}")
             except Exception as e:
