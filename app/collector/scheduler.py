@@ -79,34 +79,34 @@ def collect_metrics_from_hosts():
                 device_up_gauge.labels(host_name=host_name).set(1)
 
                 # --- Новые метрики CPU ---
-                cpu = metrics['cpu']
+                cpu = metrics.get('cpu', {})
                 cpu_load1_gauge.labels(host_name=host_name).set(cpu.get('cpu_load1', 0))
                 cpu_user_seconds_gauge.labels(host_name=host_name).set(cpu.get('cpu_seconds_total_user', 0))
                 cpu_system_seconds_gauge.labels(host_name=host_name).set(cpu.get('cpu_seconds_total_system', 0))
                 cpu_iowait_seconds_gauge.labels(host_name=host_name).set(cpu.get('cpu_seconds_total_iowait', 0))
 
                 # --- Новые метрики Memory ---
-                memory = metrics['memory']
+                memory = metrics.get('memory', {})
                 swap_total_gauge.labels(host_name=host_name).set(memory.get('memory_SwapTotal_bytes', 0))
                 swap_free_gauge.labels(host_name=host_name).set(memory.get('memory_SwapFree_bytes', 0))
                 memory_cached_gauge.labels(host_name=host_name).set(memory.get('memory_Cached_bytes', 0))
                 memory_buffers_gauge.labels(host_name=host_name).set(memory.get('memory_Buffers_bytes', 0))
 
                 # --- Новые метрики Disk ---
-                disk = metrics['disk']
+                disk = metrics.get('disk', {})
                 disk_io_time_gauge.labels(host_name=host_name).set(disk.get('disk_io_time_seconds_total', 0))
                 disk_read_time_gauge.labels(host_name=host_name).set(disk.get('disk_read_time_seconds_total', 0))
                 disk_write_time_gauge.labels(host_name=host_name).set(disk.get('disk_write_time_seconds_total', 0))
                 disk_inodes_free_gauge.labels(host_name=host_name).set(disk.get('filesystem_inodes_free', 0))
 
                 # --- Новые метрики Network ---
-                network = metrics['network']
+                network = metrics.get('network', {})
                 network_err_total_gauge.labels(host_name=host_name).set(network.get('network_err_total', 0))
                 network_dropped_total_gauge.labels(host_name=host_name).set(network.get('network_dropped_total', 0))
                 tcp_curr_estab_gauge.labels(host_name=host_name).set(network.get('netstat_Tcp_CurrEstab', 0))
 
                 # --- Новая метрика Uptime ---
-                uptime = metrics['uptime']
+                uptime = metrics.get('uptime', {})
                 uptime_seconds_gauge.labels(host_name=host_name).set(uptime.get('uptime_seconds', 0))
 
                 # --- Старые метрики ---
